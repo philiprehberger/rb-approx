@@ -70,6 +70,7 @@ Philiprehberger::Approx.assert_near(1.0, 2.0)
 | `.equal?(a, b, epsilon: 1e-9)` | Check approximate equality within epsilon |
 | `.near?(a, b, epsilon: 1e-9)` | Alias for `.equal?` |
 | `.assert_near(a, b, epsilon: 1e-9)` | Raise `Error` if values differ by more than epsilon |
+| `Error` | Error class raised by `.assert_near` (inherits `StandardError`) |
 
 ## Development
 
