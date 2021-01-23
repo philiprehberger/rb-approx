@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = 'Epsilon-based approximate equality for floats, arrays, and hashes'
   spec.description = 'Compare numeric values, arrays, and hashes for approximate equality ' \
-                       'using configurable epsilon tolerance with deep comparison support.'
+                     'using configurable epsilon tolerance with deep comparison support.'
   spec.homepage = 'https://philiprehberger.com/open-source-packages/ruby/philiprehberger-approx'
   spec.license = 'MIT'
 
