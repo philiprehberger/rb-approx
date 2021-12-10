@@ -56,6 +56,19 @@ module Philiprehberger
       compare_within(a, b, abs, rel)
     end
 
+    # Snap a value to target if approximately equal, otherwise return unchanged
+    #
+    # Returns target when value is within epsilon of target. Useful for
+    # snapping near-values to an exact canonical value.
+    #
+    # @param value [Numeric] the value to potentially snap
+    # @param target [Numeric] the target to snap to
+    # @param epsilon [Float] maximum allowed difference
+    # @return [Numeric] target if approximately equal, otherwise value
+    def self.clamp(value, target, epsilon: 1e-9)
+      equal?(value, target, epsilon: epsilon) ? target : value
+    end
+
     # Assert that two values are approximately equal, raising on mismatch
     #
     # @param a [Numeric, Array, Hash] first value
