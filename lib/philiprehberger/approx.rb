@@ -81,6 +81,41 @@ module Philiprehberger
       raise Error, "expected #{a.inspect} to be near #{b.inspect} (epsilon: #{epsilon})"
     end
 
+    # Check if a numeric value is approximately zero
+    #
+    # @param value [Numeric] value to test
+    # @param epsilon [Float] maximum allowed difference from zero
+    # @return [Boolean] true if |value| <= epsilon
+    def self.zero?(value, epsilon: 1e-9)
+      value.abs <= epsilon
+    end
+
+    # Check if a numeric value lies within [min, max] with epsilon slack on both ends
+    #
+    # @param value [Numeric] value to test
+    # @param min [Numeric] inclusive lower bound
+    # @param max [Numeric] inclusive upper bound
+    # @param epsilon [Float] tolerance applied to each bound
+    # @return [Boolean] true if min - epsilon <= value <= max + epsilon
+    def self.between?(value, min, max, epsilon: 1e-9)
+      value.between?(min - epsilon, max + epsilon)
+    end
+
+    # Assert that two values pass within?, raising on mismatch
+    #
+    # At least one of abs: or rel: must be provided.
+    #
+    # @param a [Numeric, Array, Hash] first value
+    # @param b [Numeric, Array, Hash] second value
+    # @param abs [Float, nil] absolute tolerance
+    # @param rel [Float, nil] relative tolerance
+    # @raise [Error] if values fail both tolerance checks
+    def self.assert_within(a, b, abs: nil, rel: nil)
+      return if within?(a, b, abs: abs, rel: rel)
+
+      raise Error, "expected #{a.inspect} to be within #{b.inspect} (abs: #{abs}, rel: #{rel})"
+    end
+
     class << self
       private
 

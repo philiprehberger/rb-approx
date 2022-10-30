@@ -222,4 +222,118 @@ RSpec.describe Philiprehberger::Approx do
       expect { described_class.assert_near(1.0, 1.5, epsilon: 1.0) }.not_to raise_error
     end
   end
+
+  describe '.zero?' do
+    it 'returns true for exact zero' do
+      expect(described_class.zero?(0.0)).to be true
+    end
+
+    it 'returns true for tiny positive value' do
+      expect(described_class.zero?(1e-12)).to be true
+    end
+
+    it 'returns true for tiny negative value' do
+      expect(described_class.zero?(-1e-12)).to be true
+    end
+
+    it 'returns false for larger value' do
+      expect(described_class.zero?(0.1)).to be false
+    end
+
+    it 'accepts custom epsilon' do
+      expect(described_class.zero?(0.05, epsilon: 0.1)).to be true
+    end
+
+    it 'returns true for integer zero' do
+      expect(described_class.zero?(0)).to be true
+    end
+  end
+
+  describe '.between?' do
+    it 'returns true for value within range' do
+      expect(described_class.between?(5.0, 1.0, 10.0)).to be true
+    end
+
+    it 'returns true for value at lower bound' do
+      expect(described_class.between?(1.0, 1.0, 10.0)).to be true
+    end
+
+    it 'returns true for value at upper bound' do
+      expect(described_class.between?(10.0, 1.0, 10.0)).to be true
+    end
+
+    it 'returns true for value just below lower bound within epsilon' do
+      expect(described_class.between?(1.0 - 1e-10, 1.0, 10.0)).to be true
+    end
+
+    it 'returns true for value just above upper bound within epsilon' do
+      expect(described_class.between?(10.0 + 1e-10, 1.0, 10.0)).to be true
+    end
+
+    it 'returns false for value clearly below range' do
+      expect(described_class.between?(0.5, 1.0, 10.0)).to be false
+    end
+
+    it 'returns false for value clearly above range' do
+      expect(described_class.between?(11.0, 1.0, 10.0)).to be false
+    end
+
+    it 'accepts custom epsilon' do
+      expect(described_class.between?(10.5, 1.0, 10.0, epsilon: 1.0)).to be true
+    end
+
+    it 'handles negative ranges' do
+      expect(described_class.between?(-5.0, -10.0, -1.0)).to be true
+    end
+  end
+
+  describe '.assert_within' do
+    it 'does not raise when within absolute tolerance' do
+      expect { described_class.assert_within(1.0, 1.0001, abs: 0.001) }.not_to raise_error
+    end
+
+    it 'does not raise when within relative tolerance' do
+      expect { described_class.assert_within(1_000_000.0, 1_000_001.0, rel: 1e-5) }.not_to raise_error
+    end
+
+    it 'raises Error when outside both tolerances' do
+      expect { described_class.assert_within(1.0, 2.0, abs: 0.01, rel: 1e-9) }
+        .to raise_error(described_class::Error)
+    end
+
+    it 'raises ArgumentError when no tolerance provided' do
+      expect { described_class.assert_within(1.0, 1.0) }.to raise_error(ArgumentError)
+    end
+
+    it 'includes values in error message' do
+      expect { described_class.assert_within(1.0, 2.0, abs: 0.01) }
+        .to raise_error(/expected 1.0 to be within 2.0/)
+    end
+  end
+
+  describe Philiprehberger::Approx::Comparator do
+    describe '#near?' do
+      it 'matches #equal?' do
+        comparator = described_class.new(epsilon: 0.01)
+        expect(comparator.near?(1.0, 1.005)).to be true
+      end
+    end
+
+    describe '#within?' do
+      it 'passes via absolute tolerance' do
+        comparator = described_class.new(epsilon: 0.01, relative: 1e-9)
+        expect(comparator.within?(0.001, 0.002)).to be true
+      end
+
+      it 'passes via relative tolerance' do
+        comparator = described_class.new(epsilon: 1e-9, relative: 1e-5)
+        expect(comparator.within?(1_000_000.0, 1_000_001.0)).to be true
+      end
+
+      it 'returns false when neither tolerance is met' do
+        comparator = described_class.new(epsilon: 1e-9, relative: 1e-9)
+        expect(comparator.within?(1.0, 2.0)).to be false
+      end
+    end
+  end
 end

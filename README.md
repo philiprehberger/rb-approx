@@ -104,6 +104,36 @@ comparator.assert_near(1.0, 100.0)
 # => raises Philiprehberger::Approx::Error
 ```
 
+### Zero Check
+
+```ruby
+Philiprehberger::Approx.zero?(1e-12)
+# => true
+
+Philiprehberger::Approx.zero?(0.05, epsilon: 0.1)
+# => true
+```
+
+### Range Check
+
+```ruby
+Philiprehberger::Approx.between?(5.0, 1.0, 10.0)
+# => true
+
+Philiprehberger::Approx.between?(10.0 + 1e-10, 1.0, 10.0)
+# => true (within epsilon of upper bound)
+```
+
+### Assert Within
+
+```ruby
+Philiprehberger::Approx.assert_within(1_000_000.0, 1_000_001.0, rel: 1e-5)
+# => nil (passes via relative tolerance)
+
+Philiprehberger::Approx.assert_within(1.0, 2.0, abs: 0.01)
+# => raises Philiprehberger::Approx::Error
+```
+
 ### Assert Near
 
 ```ruby
@@ -124,8 +154,13 @@ Philiprehberger::Approx.assert_near(1.0, 2.0)
 | `.within?(a, b, abs: nil, rel: nil)` | Combined mode: passes if either absolute or relative tolerance is met |
 | `.clamp(value, target, epsilon: 1e-9)` | Return target if approximately equal, otherwise return value unchanged |
 | `.assert_near(a, b, epsilon: 1e-9)` | Raise `Error` if values differ by more than epsilon |
+| `.assert_within(a, b, abs: nil, rel: nil)` | Raise `Error` if values fail both tolerance checks |
+| `.zero?(value, epsilon: 1e-9)` | Check if a numeric value is approximately zero |
+| `.between?(value, min, max, epsilon: 1e-9)` | Check if value lies in `[min, max]` with epsilon slack |
 | `Comparator.new(epsilon:, relative:)` | Reusable comparator with preset tolerances |
 | `Comparator#equal?(a, b)` | Check equality using configured tolerances |
+| `Comparator#near?(a, b)` | Alias for `Comparator#equal?` |
+| `Comparator#within?(a, b)` | Check using combined absolute + relative configured tolerances |
 | `Comparator#assert_near(a, b)` | Raise `Error` if values are not approximately equal |
 | `Error` | Error class raised by `.assert_near` (inherits `StandardError`) |
 

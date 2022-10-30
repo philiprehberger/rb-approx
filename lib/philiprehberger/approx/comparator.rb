@@ -29,6 +29,24 @@ module Philiprehberger
         end
       end
 
+      # Alias for #equal? matching the module-level near? naming
+      #
+      # @param a [Numeric, Array, Hash] first value
+      # @param b [Numeric, Array, Hash] second value
+      # @return [Boolean]
+      def near?(a, b)
+        equal?(a, b)
+      end
+
+      # Check using combined absolute + relative tolerance from the configured comparator
+      #
+      # @param a [Numeric, Array, Hash] first value
+      # @param b [Numeric, Array, Hash] second value
+      # @return [Boolean]
+      def within?(a, b)
+        Approx.within?(a, b, abs: @epsilon, rel: @relative)
+      end
+
       # Assert that two values are approximately equal, raising on mismatch
       #
       # @param a [Numeric, Array, Hash] first value
