@@ -222,6 +222,76 @@ RSpec.describe Philiprehberger::Approx do
       end
     end
 
+    describe '#relative_equal?' do
+      it 'uses relative tolerance from constructor' do
+        c = described_class.new(relative: 1e-3)
+        expect(c.relative_equal?(1_000.0, 1_000.5)).to be true
+      end
+
+      it 'returns false when outside tolerance' do
+        c = described_class.new(relative: 1e-6)
+        expect(c.relative_equal?(1.0, 2.0)).to be false
+      end
+
+      it 'falls back to epsilon when relative is nil' do
+        c = described_class.new(epsilon: 0.5)
+        expect(c.relative_equal?(1.0, 1.3)).to be true
+      end
+    end
+
+    describe '#clamp' do
+      it 'snaps near value to target' do
+        c = described_class.new(epsilon: 0.1)
+        expect(c.clamp(1.05, 1.0)).to eq(1.0)
+      end
+
+      it 'returns value unchanged when not near' do
+        c = described_class.new(epsilon: 0.01)
+        expect(c.clamp(1.5, 1.0)).to eq(1.5)
+      end
+    end
+
+    describe '#zero?' do
+      it 'detects approximately zero values' do
+        c = described_class.new(epsilon: 0.01)
+        expect(c.zero?(0.005)).to be true
+      end
+
+      it 'returns false for non-zero values' do
+        c = described_class.new
+        expect(c.zero?(1.0)).to be false
+      end
+    end
+
+    describe '#between?' do
+      it 'checks value within range' do
+        c = described_class.new(epsilon: 0.1)
+        expect(c.between?(5.0, 1.0, 10.0)).to be true
+      end
+
+      it 'allows epsilon slack on bounds' do
+        c = described_class.new(epsilon: 0.1)
+        expect(c.between?(10.05, 1.0, 10.0)).to be true
+      end
+
+      it 'returns false when outside range plus epsilon' do
+        c = described_class.new(epsilon: 0.01)
+        expect(c.between?(11.0, 1.0, 10.0)).to be false
+      end
+    end
+
+    describe '#assert_within' do
+      it 'does not raise when within tolerance' do
+        c = described_class.new(epsilon: 0.1, relative: 1e-3)
+        expect { c.assert_within(1.0, 1.05) }.not_to raise_error
+      end
+
+      it 'raises Error when outside tolerance' do
+        c = described_class.new(epsilon: 0.001, relative: 1e-9)
+        expect { c.assert_within(1.0, 2.0) }.to raise_error(Philiprehberger::Approx::Error)
+      end
+    end
+
     describe 'attributes' do
       it 'exposes epsilon' do
         c = described_class.new(epsilon: 0.5)

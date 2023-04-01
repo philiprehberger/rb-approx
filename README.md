@@ -162,6 +162,11 @@ Philiprehberger::Approx.assert_near(1.0, 2.0)
 | `Comparator#near?(a, b)` | Alias for `Comparator#equal?` |
 | `Comparator#within?(a, b)` | Check using combined absolute + relative configured tolerances |
 | `Comparator#assert_near(a, b)` | Raise `Error` if values are not approximately equal |
+| `Comparator#relative_equal?(a, b)` | Check relative tolerance using configured tolerances |
+| `Comparator#clamp(value, target)` | Snap value to target using configured epsilon |
+| `Comparator#zero?(value)` | Check if value is approximately zero using configured epsilon |
+| `Comparator#between?(value, min, max)` | Check if value lies in range using configured epsilon |
+| `Comparator#assert_within(a, b)` | Raise `Error` if values fail configured tolerance checks |
 | `Error` | Error class raised by `.assert_near` (inherits `StandardError`) |
 
 ## Development

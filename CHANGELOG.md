@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-04-10
+
+### Added
+- `Comparator#relative_equal?` for relative tolerance using configured tolerances
+- `Comparator#clamp` to snap values using configured epsilon
+- `Comparator#zero?` for approximate-zero checks using configured epsilon
+- `Comparator#between?` for range checks using configured epsilon
+- `Comparator#assert_within` assertion using configured tolerances
+
 ## [0.4.0] - 2026-04-09
 
 ### Added
