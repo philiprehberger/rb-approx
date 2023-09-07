@@ -2,6 +2,7 @@
 
 require_relative 'approx/version'
 require_relative 'approx/comparator'
+require_relative 'approx/rspec_matchers'
 
 module Philiprehberger
   module Approx
@@ -116,6 +117,35 @@ module Philiprehberger
       raise Error, "expected #{a.inspect} to be within #{b.inspect} (abs: #{abs}, rel: #{rel})"
     end
 
+    # Check if two values are approximately equal within a percentage tolerance
+    #
+    # @param a [Numeric, Array, Hash] first value
+    # @param b [Numeric, Array, Hash] second value
+    # @param percent [Float] maximum allowed percentage difference
+    # @return [Boolean] true if values are within the percentage tolerance
+    def self.percent_equal?(a, b, percent:)
+      compare_percent(a, b, percent)
+    end
+
+    # Return a diagnostic hash showing why values do or do not match
+    #
+    # @param a [Numeric] first value
+    # @param b [Numeric] second value
+    # @param epsilon [Float] maximum allowed difference
+    # @return [Hash] diagnostic hash with :match, :actual_diff, :allowed, :ratio
+    def self.diff(a, b, epsilon: Float::EPSILON)
+      actual_diff = (a - b).abs.to_f
+      allowed = epsilon.to_f
+      ratio = allowed.zero? ? Float::INFINITY : actual_diff / allowed
+
+      {
+        match: actual_diff <= allowed,
+        actual_diff: actual_diff,
+        allowed: allowed,
+        ratio: ratio
+      }
+    end
+
     class << self
       private
 
@@ -171,6 +201,29 @@ module Philiprehberger
         else
           a == b
         end
+      end
+
+      def compare_percent(a, b, percent)
+        case [a, b]
+        in [Numeric, Numeric]
+          percent_near?(a, b, percent)
+        in [Array, Array]
+          return false unless a.length == b.length
+
+          a.zip(b).all? { |x, y| compare_percent(x, y, percent) }
+        in [Hash, Hash]
+          return false unless a.keys.sort == b.keys.sort
+
+          a.all? { |k, v| compare_percent(v, b[k], percent) }
+        else
+          a == b
+        end
+      end
+
+      def percent_near?(a, b, percent)
+        return true if a.zero? && b.zero?
+
+        (a - b).abs <= (percent / 100.0) * [a.abs, b.abs].max
       end
 
       def relative_near?(a, b, tolerance)
