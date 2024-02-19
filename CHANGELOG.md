@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-04-15
+
+### Added
+- `Approx.sign_equal?(a, b, epsilon:)` to check whether two values share the same sign, treating near-zero values as zero
+
 ## [0.6.0] - 2026-04-14
 
 ### Added

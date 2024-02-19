@@ -287,6 +287,48 @@ RSpec.describe Philiprehberger::Approx do
     end
   end
 
+  describe '.sign_equal?' do
+    it 'returns true for two positive values' do
+      expect(described_class.sign_equal?(5.0, 7.0)).to be true
+    end
+
+    it 'returns true for two negative values' do
+      expect(described_class.sign_equal?(-2.0, -9.0)).to be true
+    end
+
+    it 'returns false for opposite signs' do
+      expect(described_class.sign_equal?(2.0, -3.0)).to be false
+    end
+
+    it 'returns true when both values are near zero' do
+      expect(described_class.sign_equal?(1e-12, -1e-12)).to be true
+    end
+
+    it 'returns false when one value is near zero and the other is positive' do
+      expect(described_class.sign_equal?(1e-12, 2.0)).to be false
+    end
+
+    it 'returns false when one value is near zero and the other is negative' do
+      expect(described_class.sign_equal?(1e-12, -2.0)).to be false
+    end
+
+    it 'accepts a custom epsilon' do
+      expect(described_class.sign_equal?(0.05, -0.05, epsilon: 0.1)).to be true
+    end
+
+    it 'handles integer inputs' do
+      expect(described_class.sign_equal?(3, 4)).to be true
+    end
+
+    it 'handles negative integer inputs' do
+      expect(described_class.sign_equal?(-3, -4)).to be true
+    end
+
+    it 'returns false for integers with opposite signs' do
+      expect(described_class.sign_equal?(3, -4)).to be false
+    end
+  end
+
   describe '.assert_within' do
     it 'does not raise when within absolute tolerance' do
       expect { described_class.assert_within(1.0, 1.0001, abs: 0.001) }.not_to raise_error
