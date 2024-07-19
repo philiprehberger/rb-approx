@@ -287,6 +287,34 @@ RSpec.describe Philiprehberger::Approx do
     end
   end
 
+  describe '.tolerance_range' do
+    it 'returns [min, max] around a value' do
+      expect(described_class.tolerance_range(5.0, epsilon: 0.1)).to eq([4.9, 5.1])
+    end
+
+    it 'uses default epsilon' do
+      min, max = described_class.tolerance_range(1.0)
+      expect(min).to be_within(1e-15).of(1.0 - 1e-9)
+      expect(max).to be_within(1e-15).of(1.0 + 1e-9)
+    end
+
+    it 'handles zero value' do
+      expect(described_class.tolerance_range(0.0, epsilon: 0.5)).to eq([-0.5, 0.5])
+    end
+
+    it 'handles negative value' do
+      expect(described_class.tolerance_range(-3.0, epsilon: 0.1)).to eq([-3.1, -2.9])
+    end
+
+    it 'handles integer input' do
+      expect(described_class.tolerance_range(10, epsilon: 1)).to eq([9, 11])
+    end
+
+    it 'returns exact bounds with zero epsilon' do
+      expect(described_class.tolerance_range(5.0, epsilon: 0.0)).to eq([5.0, 5.0])
+    end
+  end
+
   describe '.sign_equal?' do
     it 'returns true for two positive values' do
       expect(described_class.sign_equal?(5.0, 7.0)).to be true
