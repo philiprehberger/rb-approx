@@ -514,4 +514,79 @@ RSpec.describe Philiprehberger::Approx do
       end
     end
   end
+
+  describe 'rel_tol option' do
+    it 'preserves default behavior when rel_tol is omitted' do
+      expect(described_class.equal?(1.0, 1.0 + 1e-10)).to be true
+      expect(described_class.equal?(1.0, 1.1)).to be false
+    end
+
+    it 'treats rel_tol: 0 as identical to prior behavior' do
+      expect(described_class.equal?(1.0, 1.0 + 1e-10, rel_tol: 0)).to be true
+      expect(described_class.equal?(1.0, 1.1, rel_tol: 0)).to be false
+    end
+
+    it 'allows 1e12 vs 1e12 + 1e9 within 1 percent' do
+      expect(described_class.equal?(1e12, 1e12 + 1e9, rel_tol: 0.01)).to be true
+    end
+
+    it 'rejects 1 vs 2 at rel_tol: 0.01' do
+      expect(described_class.equal?(1.0, 2.0, rel_tol: 0.01)).to be false
+    end
+
+    it 'combines rel_tol with epsilon, passing via epsilon at small magnitudes' do
+      # 1e-20 vs 2e-20: rel diff is 0.5 (rel_tol 0.01 fails), but abs diff 1e-20 <= 1e-9.
+      expect(described_class.equal?(1e-20, 2e-20, epsilon: 1e-9, rel_tol: 0.01)).to be true
+    end
+
+    it 'propagates rel_tol into array comparisons' do
+      a = [1e12, 2e12]
+      b = [1e12 + 1e9, 2e12 + 2e9]
+      expect(described_class.equal?(a, b, rel_tol: 0.01)).to be true
+    end
+
+    it 'rejects array elements that exceed rel_tol' do
+      expect(described_class.equal?([1e12, 1.0], [1e12 + 1e9, 2.0], rel_tol: 0.01)).to be false
+    end
+
+    it 'propagates rel_tol into hash comparisons' do
+      a = { distance: 1e12, duration: 1e9 }
+      b = { distance: 1e12 + 1e9, duration: 1e9 + 1e6 }
+      expect(described_class.equal?(a, b, rel_tol: 0.01)).to be true
+    end
+
+    it 'propagates rel_tol recursively into nested hashes' do
+      a = { nested: { value: 1e12 } }
+      b = { nested: { value: 1e12 + 1e9 } }
+      expect(described_class.equal?(a, b, rel_tol: 0.01)).to be true
+    end
+
+    it 'is honored by .near?' do
+      expect(described_class.near?(1e12, 1e12 + 1e9, rel_tol: 0.01)).to be true
+    end
+
+    it 'is honored by .clamp' do
+      expect(described_class.clamp(1e12 + 1e9, 1e12, rel_tol: 0.01)).to eq(1e12)
+    end
+
+    it 'is honored by .assert_near' do
+      expect { described_class.assert_near(1e12, 1e12 + 1e9, rel_tol: 0.01) }.not_to raise_error
+    end
+
+    it 'rejects NaN even with rel_tol set' do
+      expect(described_class.equal?(Float::NAN, Float::NAN, rel_tol: 0.5)).to be false
+    end
+
+    describe 'RSpec matcher' do
+      include Philiprehberger::Approx::RSpecMatchers
+
+      it 'accepts rel_tol: on be_approx' do
+        expect(1e12).to be_approx(1e12 + 1e9, rel_tol: 0.01)
+      end
+
+      it 'fails be_approx when rel_tol is exceeded' do
+        expect(1.0).not_to be_approx(2.0, rel_tol: 0.01)
+      end
+    end
+  end
 end
