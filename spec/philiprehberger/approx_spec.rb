@@ -155,6 +155,53 @@ RSpec.describe Philiprehberger::Approx do
     end
   end
 
+  describe '.all_equal?' do
+    it 'returns true for an empty array' do
+      expect(described_class.all_equal?([])).to be true
+    end
+
+    it 'returns true for a single-element array' do
+      expect(described_class.all_equal?([1.0])).to be true
+    end
+
+    it 'returns true when all elements are approximately equal with default epsilon' do
+      expect(described_class.all_equal?([1.0, 1.0 + 1e-12])).to be true
+    end
+
+    it 'returns true for multiple elements within default epsilon' do
+      expect(described_class.all_equal?([1.0, 1.0 + 1e-12, 1.0 - 1e-12])).to be true
+    end
+
+    it 'returns false when any element is an outlier' do
+      expect(described_class.all_equal?([1.0, 1.0, 2.0])).to be false
+    end
+
+    it 'respects a custom epsilon when elements are within it' do
+      expect(described_class.all_equal?([1.0, 1.05, 0.95], epsilon: 0.1)).to be true
+    end
+
+    it 'respects a custom epsilon when an element is just outside' do
+      expect(described_class.all_equal?([1.0, 1.0, 1.2], epsilon: 0.1)).to be false
+    end
+
+    it 'honors rel_tol for large magnitudes' do
+      expect(described_class.all_equal?([1e12, 1e12 + 1e9, 1e12 - 1e9], rel_tol: 0.01)).to be true
+    end
+
+    it 'accepts an Enumerator' do
+      enum = [1.0, 1.0 + 1e-12, 1.0 - 1e-12].each
+      expect(described_class.all_equal?(enum)).to be true
+    end
+
+    it 'accepts a Range' do
+      expect(described_class.all_equal?(5..5)).to be true
+    end
+
+    it 'returns false for a Range with multiple distinct integers' do
+      expect(described_class.all_equal?(1..3)).to be false
+    end
+  end
+
   describe '.clamp' do
     it 'returns target when value is approximately equal' do
       expect(described_class.clamp(1.0 + 1e-10, 1.0)).to eq(1.0)
