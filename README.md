@@ -15,7 +15,7 @@ Epsilon-based approximate equality for floats, arrays, and hashes
 Add to your Gemfile:
 
 ```ruby
-gem 'philiprehberger-approx'
+gem "philiprehberger-approx"
 ```
 
 Or install directly:
