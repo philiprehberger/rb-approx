@@ -27,7 +27,7 @@ gem install philiprehberger-approx
 ## Usage
 
 ```ruby
-require 'philiprehberger/approx'
+require "philiprehberger/approx"
 
 Philiprehberger::Approx.equal?(1.0, 1.0 + 1e-10)
 # => true
