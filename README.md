@@ -53,6 +53,42 @@ Philiprehberger::Approx.equal?({ x: 1.0 }, { x: 1.0 + 1e-10 })
 # => true
 ```
 
+### Relative Tolerance
+
+```ruby
+Philiprehberger::Approx.relative_equal?(1_000_000.0, 1_000_001.0, tolerance: 1e-5)
+# => true
+
+Philiprehberger::Approx.relative_equal?(1.0, 2.0, tolerance: 1e-6)
+# => false
+```
+
+Supports arrays and hashes recursively, just like `equal?`. Falls back to absolute comparison when both values are zero.
+
+### Combined Tolerance
+
+```ruby
+Philiprehberger::Approx.within?(1_000_000.0, 1_000_001.0, abs: 1e-9, rel: 1e-5)
+# => true (passes via relative tolerance)
+
+Philiprehberger::Approx.within?(0.001, 0.002, abs: 0.01, rel: 1e-9)
+# => true (passes via absolute tolerance)
+```
+
+Passes if either the absolute or relative tolerance is met. At least one of `abs:` or `rel:` must be provided.
+
+### Reusable Comparator
+
+```ruby
+comparator = Philiprehberger::Approx::Comparator.new(epsilon: 0.01, relative: 1e-3)
+
+comparator.equal?(1_000.0, 1_000.5)
+# => true
+
+comparator.assert_near(1.0, 100.0)
+# => raises Philiprehberger::Approx::Error
+```
+
 ### Assert Near
 
 ```ruby
@@ -69,7 +105,12 @@ Philiprehberger::Approx.assert_near(1.0, 2.0)
 |--------|-------------|
 | `.equal?(a, b, epsilon: 1e-9)` | Check approximate equality within epsilon |
 | `.near?(a, b, epsilon: 1e-9)` | Alias for `.equal?` |
+| `.relative_equal?(a, b, tolerance: 1e-6)` | Check relative tolerance: `\|a - b\| / max(\|a\|, \|b\|) <= tolerance` |
+| `.within?(a, b, abs: nil, rel: nil)` | Combined mode: passes if either absolute or relative tolerance is met |
 | `.assert_near(a, b, epsilon: 1e-9)` | Raise `Error` if values differ by more than epsilon |
+| `Comparator.new(epsilon:, relative:)` | Reusable comparator with preset tolerances |
+| `Comparator#equal?(a, b)` | Check equality using configured tolerances |
+| `Comparator#assert_near(a, b)` | Raise `Error` if values are not approximately equal |
 | `Error` | Error class raised by `.assert_near` (inherits `StandardError`) |
 
 ## Development
