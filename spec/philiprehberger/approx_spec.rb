@@ -155,6 +155,44 @@ RSpec.describe Philiprehberger::Approx do
     end
   end
 
+  describe '.clamp' do
+    it 'returns target when value is approximately equal' do
+      expect(described_class.clamp(1.0 + 1e-10, 1.0)).to eq(1.0)
+    end
+
+    it 'returns value when not approximately equal' do
+      expect(described_class.clamp(1.1, 1.0)).to eq(1.1)
+    end
+
+    it 'returns target for exact match' do
+      expect(described_class.clamp(5.0, 5.0)).to eq(5.0)
+    end
+
+    it 'uses custom epsilon' do
+      expect(described_class.clamp(1.05, 1.0, epsilon: 0.1)).to eq(1.0)
+    end
+
+    it 'returns value when outside custom epsilon' do
+      expect(described_class.clamp(1.2, 1.0, epsilon: 0.1)).to eq(1.2)
+    end
+
+    it 'handles zero target' do
+      expect(described_class.clamp(1e-10, 0.0)).to eq(0.0)
+    end
+
+    it 'returns value when far from zero target' do
+      expect(described_class.clamp(1.0, 0.0)).to eq(1.0)
+    end
+
+    it 'handles negative values' do
+      expect(described_class.clamp(-1.0 + 1e-10, -1.0)).to eq(-1.0)
+    end
+
+    it 'handles integers' do
+      expect(described_class.clamp(5, 5)).to eq(5)
+    end
+  end
+
   describe '.assert_near' do
     it 'does not raise for near values' do
       expect { described_class.assert_near(1.0, 1.0 + 1e-10) }.not_to raise_error
