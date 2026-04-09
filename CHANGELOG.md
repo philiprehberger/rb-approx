@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-09
+
+### Added
+- `zero?(value, epsilon:)` helper for approximate-zero checks
+- `between?(value, min, max, epsilon:)` for tolerance-aware range checks
+- `assert_within(a, b, abs:, rel:)` assertion mirror of `within?`
+- `Comparator#near?` and `Comparator#within?` for parity with module methods
+
 ## [0.3.0] - 2026-04-04
 
 ### Added
