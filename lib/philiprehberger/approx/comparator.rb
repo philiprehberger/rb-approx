@@ -57,6 +57,51 @@ module Philiprehberger
 
         raise Error, "expected #{a.inspect} to be near #{b.inspect} (epsilon: #{@epsilon}, relative: #{@relative})"
       end
+
+      # Check if two values are approximately equal using relative tolerance
+      #
+      # @param a [Numeric, Array, Hash] first value
+      # @param b [Numeric, Array, Hash] second value
+      # @return [Boolean]
+      def relative_equal?(a, b)
+        Approx.relative_equal?(a, b, tolerance: @relative || @epsilon)
+      end
+
+      # Snap a value to target if approximately equal, otherwise return unchanged
+      #
+      # @param value [Numeric] the value to potentially snap
+      # @param target [Numeric] the target to snap to
+      # @return [Numeric] target if approximately equal, otherwise value
+      def clamp(value, target)
+        Approx.clamp(value, target, epsilon: @epsilon)
+      end
+
+      # Check if a numeric value is approximately zero
+      #
+      # @param value [Numeric] value to test
+      # @return [Boolean]
+      def zero?(value)
+        Approx.zero?(value, epsilon: @epsilon)
+      end
+
+      # Check if a numeric value lies within [min, max] with epsilon slack
+      #
+      # @param value [Numeric] value to test
+      # @param min [Numeric] inclusive lower bound
+      # @param max [Numeric] inclusive upper bound
+      # @return [Boolean]
+      def between?(value, min, max)
+        Approx.between?(value, min, max, epsilon: @epsilon)
+      end
+
+      # Assert that two values pass within?, raising on mismatch
+      #
+      # @param a [Numeric, Array, Hash] first value
+      # @param b [Numeric, Array, Hash] second value
+      # @raise [Error] if values fail both tolerance checks
+      def assert_within(a, b)
+        Approx.assert_within(a, b, abs: @epsilon, rel: @relative)
+      end
     end
   end
 end
