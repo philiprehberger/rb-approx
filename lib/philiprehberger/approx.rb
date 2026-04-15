@@ -102,6 +102,24 @@ module Philiprehberger
       value.between?(min - epsilon, max + epsilon)
     end
 
+    # Check if two numeric values share the same sign
+    #
+    # Values with |x| <= epsilon are treated as zero, so two near-zero values
+    # are considered to share a sign regardless of their raw polarity.
+    #
+    # @param a [Numeric] first value
+    # @param b [Numeric] second value
+    # @param epsilon [Float] threshold below which a value is treated as zero
+    # @return [Boolean] true if both values share the same sign (or both are near zero)
+    def self.sign_equal?(a, b, epsilon: 1e-9)
+      a_zero = a.abs <= epsilon
+      b_zero = b.abs <= epsilon
+      return true if a_zero && b_zero
+      return false if a_zero || b_zero
+
+      (a.positive? && b.positive?) || (a.negative? && b.negative?)
+    end
+
     # Assert that two values pass within?, raising on mismatch
     #
     # At least one of abs: or rel: must be provided.

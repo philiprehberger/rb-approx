@@ -124,6 +124,21 @@ Philiprehberger::Approx.between?(10.0 + 1e-10, 1.0, 10.0)
 # => true (within epsilon of upper bound)
 ```
 
+### Sign Equality
+
+```ruby
+Philiprehberger::Approx.sign_equal?(5.0, 7.0)
+# => true (both positive)
+
+Philiprehberger::Approx.sign_equal?(2.0, -3.0)
+# => false (opposite signs)
+
+Philiprehberger::Approx.sign_equal?(1e-12, -1e-12)
+# => true (both near zero)
+```
+
+Values with `|x| <= epsilon` are treated as zero, so two near-zero values are considered to share a sign regardless of their raw polarity.
+
 ### Assert Within
 
 ```ruby
@@ -206,6 +221,7 @@ end
 | `.percent_equal?(a, b, percent:)` | Check approximate equality within a percentage tolerance |
 | `.diff(a, b, epsilon: Float::EPSILON)` | Return diagnostic hash with match status, actual diff, allowed diff, and ratio |
 | `.between?(value, min, max, epsilon: 1e-9)` | Check if value lies in `[min, max]` with epsilon slack |
+| `.sign_equal?(a, b, epsilon: 1e-9)` | Check if two values share the same sign, treating near-zero values as zero |
 | `RSpecMatchers#be_approx(expected, epsilon:)` | RSpec matcher for approximate equality |
 | `RSpecMatchers#be_approx_within(expected, abs:, rel:, percent:)` | RSpec matcher with abs, rel, or percent tolerance |
 | `Comparator.new(epsilon:, relative:)` | Reusable comparator with preset tolerances |
