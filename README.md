@@ -144,6 +144,53 @@ Philiprehberger::Approx.assert_near(1.0, 2.0)
 # => raises Philiprehberger::Approx::Error
 ```
 
+### Percentage Tolerance
+
+```ruby
+Philiprehberger::Approx.percent_equal?(100.0, 105.0, percent: 10)
+# => true (5% difference is within 10% tolerance)
+
+Philiprehberger::Approx.percent_equal?(100.0, 115.0, percent: 10)
+# => false (15% difference exceeds 10% tolerance)
+```
+
+Supports arrays and hashes recursively. Returns true when both values are zero.
+
+### Diff Diagnostics
+
+```ruby
+Philiprehberger::Approx.diff(1.0, 1.5, epsilon: 1.0)
+# => { match: true, actual_diff: 0.5, allowed: 1.0, ratio: 0.5 }
+
+Philiprehberger::Approx.diff(1.0, 3.0, epsilon: 1.0)
+# => { match: false, actual_diff: 2.0, allowed: 1.0, ratio: 2.0 }
+```
+
+Returns a diagnostic hash showing the actual difference, the allowed tolerance, and the ratio between them.
+
+### RSpec Integration
+
+```ruby
+require 'philiprehberger/approx'
+
+RSpec.configure do |config|
+  config.include Philiprehberger::Approx::RSpecMatchers
+end
+
+RSpec.describe 'calculations' do
+  it 'is approximately equal' do
+    expect(1.0).to be_approx(1.0 + 1e-16)
+    expect(1.0).to be_approx(1.05, epsilon: 0.1)
+  end
+
+  it 'is within tolerance' do
+    expect(1.0).to be_approx_within(1.005, abs: 0.01)
+    expect(1_000_000.0).to be_approx_within(1_000_001.0, rel: 1e-5)
+    expect(100.0).to be_approx_within(105.0, percent: 10)
+  end
+end
+```
+
 ## API
 
 | Method | Description |
@@ -156,7 +203,11 @@ Philiprehberger::Approx.assert_near(1.0, 2.0)
 | `.assert_near(a, b, epsilon: 1e-9)` | Raise `Error` if values differ by more than epsilon |
 | `.assert_within(a, b, abs: nil, rel: nil)` | Raise `Error` if values fail both tolerance checks |
 | `.zero?(value, epsilon: 1e-9)` | Check if a numeric value is approximately zero |
+| `.percent_equal?(a, b, percent:)` | Check approximate equality within a percentage tolerance |
+| `.diff(a, b, epsilon: Float::EPSILON)` | Return diagnostic hash with match status, actual diff, allowed diff, and ratio |
 | `.between?(value, min, max, epsilon: 1e-9)` | Check if value lies in `[min, max]` with epsilon slack |
+| `RSpecMatchers#be_approx(expected, epsilon:)` | RSpec matcher for approximate equality |
+| `RSpecMatchers#be_approx_within(expected, abs:, rel:, percent:)` | RSpec matcher with abs, rel, or percent tolerance |
 | `Comparator.new(epsilon:, relative:)` | Reusable comparator with preset tolerances |
 | `Comparator#equal?(a, b)` | Check equality using configured tolerances |
 | `Comparator#near?(a, b)` | Alias for `Comparator#equal?` |

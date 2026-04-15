@@ -311,6 +311,114 @@ RSpec.describe Philiprehberger::Approx do
     end
   end
 
+  describe '.percent_equal?' do
+    it 'returns true when within percentage tolerance' do
+      expect(described_class.percent_equal?(100.0, 105.0, percent: 10)).to be true
+    end
+
+    it 'returns false when outside percentage tolerance' do
+      expect(described_class.percent_equal?(100.0, 115.0, percent: 10)).to be false
+    end
+
+    it 'returns true when both values are zero' do
+      expect(described_class.percent_equal?(0.0, 0.0, percent: 5)).to be true
+    end
+
+    it 'handles negative values' do
+      expect(described_class.percent_equal?(-100.0, -105.0, percent: 10)).to be true
+    end
+
+    it 'returns false for negative values outside tolerance' do
+      expect(described_class.percent_equal?(-100.0, -120.0, percent: 10)).to be false
+    end
+
+    it 'compares arrays element-wise' do
+      expect(described_class.percent_equal?([100.0, 200.0], [105.0, 210.0], percent: 10)).to be true
+    end
+
+    it 'returns false for arrays with mismatched element' do
+      expect(described_class.percent_equal?([100.0, 200.0], [105.0, 250.0], percent: 10)).to be false
+    end
+
+    it 'compares hashes by value' do
+      a = { x: 100.0, y: 200.0 }
+      b = { x: 105.0, y: 195.0 }
+      expect(described_class.percent_equal?(a, b, percent: 10)).to be true
+    end
+
+    it 'returns false for hashes with different keys' do
+      expect(described_class.percent_equal?({ a: 100.0 }, { b: 100.0 }, percent: 10)).to be false
+    end
+  end
+
+  describe '.diff' do
+    it 'returns a hash with correct keys' do
+      result = described_class.diff(1.0, 2.0)
+      expect(result).to include(:match, :actual_diff, :allowed, :ratio)
+    end
+
+    it 'returns match: true when values are within epsilon' do
+      result = described_class.diff(1.0, 1.0, epsilon: 0.1)
+      expect(result[:match]).to be true
+    end
+
+    it 'returns match: false when values differ beyond epsilon' do
+      result = described_class.diff(1.0, 2.0, epsilon: 0.1)
+      expect(result[:match]).to be false
+    end
+
+    it 'computes correct actual_diff' do
+      result = described_class.diff(3.0, 5.0, epsilon: 1.0)
+      expect(result[:actual_diff]).to be_within(1e-12).of(2.0)
+    end
+
+    it 'computes correct ratio' do
+      result = described_class.diff(1.0, 1.5, epsilon: 1.0)
+      expect(result[:ratio]).to be_within(1e-12).of(0.5)
+    end
+
+    it 'returns infinity ratio when epsilon is zero' do
+      result = described_class.diff(1.0, 2.0, epsilon: 0.0)
+      expect(result[:ratio]).to eq(Float::INFINITY)
+    end
+  end
+
+  describe Philiprehberger::Approx::RSpecMatchers do
+    include described_class
+
+    describe '#be_approx' do
+      it 'passes for approximately equal values' do
+        expect(1.0).to be_approx(1.0 + 1e-16)
+      end
+
+      it 'fails for values outside epsilon' do
+        expect(1.0).not_to be_approx(2.0)
+      end
+
+      it 'supports custom epsilon' do
+        expect(1.0).to be_approx(1.05, epsilon: 0.1)
+      end
+    end
+
+    describe '#be_approx_within' do
+      it 'passes with absolute tolerance' do
+        expect(1.0).to be_approx_within(1.005, abs: 0.01)
+      end
+
+      it 'passes with relative tolerance' do
+        expect(1_000_000.0).to be_approx_within(1_000_001.0, rel: 1e-5)
+      end
+
+      it 'passes with percent tolerance' do
+        expect(100.0).to be_approx_within(105.0, percent: 10)
+      end
+
+      it 'fails when outside tolerance' do
+        expect(1.0).not_to be_approx_within(2.0, abs: 0.01)
+      end
+    end
+  end
+
   describe Philiprehberger::Approx::Comparator do
     describe '#near?' do
       it 'matches #equal?' do

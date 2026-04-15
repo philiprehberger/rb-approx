@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-04-14
+
+### Added
+- `Approx.percent_equal?(a, b, percent:)` for percentage-based tolerance comparison
+- `Approx.diff(a, b, epsilon:)` returning diagnostic hash with match status, actual diff, allowed diff, and ratio
+- `Approx::RSpecMatchers` module with `be_approx` and `be_approx_within` custom matchers for RSpec integration
+
 ## [0.5.0] - 2026-04-10
 
 ### Added
