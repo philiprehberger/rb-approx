@@ -10,22 +10,28 @@ module Philiprehberger
 
     # Check if two values are approximately equal within epsilon
     #
+    # When rel_tol is non-zero, values match if either tolerance passes,
+    # matching Python's math.isclose semantics:
+    # |a - b| <= max(rel_tol * max(|a|, |b|), epsilon)
+    #
     # @param a [Numeric, Array, Hash] first value
     # @param b [Numeric, Array, Hash] second value
-    # @param epsilon [Float] maximum allowed difference
+    # @param epsilon [Float] maximum allowed absolute difference
+    # @param rel_tol [Float] relative tolerance (default 0 — disabled)
     # @return [Boolean] true if values are approximately equal
-    def self.equal?(a, b, epsilon: 1e-9)
-      compare(a, b, epsilon)
+    def self.equal?(a, b, epsilon: 1e-9, rel_tol: 0)
+      compare(a, b, epsilon, rel_tol)
     end
 
     # Alias for equal? with explicit epsilon
     #
     # @param a [Numeric, Array, Hash] first value
     # @param b [Numeric, Array, Hash] second value
-    # @param epsilon [Float] maximum allowed difference
+    # @param epsilon [Float] maximum allowed absolute difference
+    # @param rel_tol [Float] relative tolerance (default 0 — disabled)
     # @return [Boolean] true if values are near each other
-    def self.near?(a, b, epsilon: 1e-9)
-      equal?(a, b, epsilon: epsilon)
+    def self.near?(a, b, epsilon: 1e-9, rel_tol: 0)
+      equal?(a, b, epsilon: epsilon, rel_tol: rel_tol)
     end
 
     # Check if two values are approximately equal using relative tolerance
@@ -64,22 +70,24 @@ module Philiprehberger
     #
     # @param value [Numeric] the value to potentially snap
     # @param target [Numeric] the target to snap to
-    # @param epsilon [Float] maximum allowed difference
+    # @param epsilon [Float] maximum allowed absolute difference
+    # @param rel_tol [Float] relative tolerance (default 0 — disabled)
     # @return [Numeric] target if approximately equal, otherwise value
-    def self.clamp(value, target, epsilon: 1e-9)
-      equal?(value, target, epsilon: epsilon) ? target : value
+    def self.clamp(value, target, epsilon: 1e-9, rel_tol: 0)
+      equal?(value, target, epsilon: epsilon, rel_tol: rel_tol) ? target : value
     end
 
     # Assert that two values are approximately equal, raising on mismatch
     #
     # @param a [Numeric, Array, Hash] first value
     # @param b [Numeric, Array, Hash] second value
-    # @param epsilon [Float] maximum allowed difference
-    # @raise [Error] if values differ by more than epsilon
-    def self.assert_near(a, b, epsilon: 1e-9)
-      return if equal?(a, b, epsilon: epsilon)
+    # @param epsilon [Float] maximum allowed absolute difference
+    # @param rel_tol [Float] relative tolerance (default 0 — disabled)
+    # @raise [Error] if values differ by more than the allowed tolerance
+    def self.assert_near(a, b, epsilon: 1e-9, rel_tol: 0)
+      return if equal?(a, b, epsilon: epsilon, rel_tol: rel_tol)
 
-      raise Error, "expected #{a.inspect} to be near #{b.inspect} (epsilon: #{epsilon})"
+      raise Error, "expected #{a.inspect} to be near #{b.inspect} (epsilon: #{epsilon}, rel_tol: #{rel_tol})"
     end
 
     # Check if a numeric value is approximately zero
@@ -176,18 +184,26 @@ module Philiprehberger
     class << self
       private
 
-      def compare(a, b, epsilon)
+      def compare(a, b, epsilon, rel_tol = 0)
         case [a, b]
         in [Numeric, Numeric]
-          (a - b).abs <= epsilon
+          diff = (a - b).abs
+          return true if diff <= epsilon
+          return false if rel_tol.nil? || rel_tol.zero?
+          return false if a.respond_to?(:nan?) && a.nan?
+          return false if b.respond_to?(:nan?) && b.nan?
+          return false if a.respond_to?(:infinite?) && a.infinite?
+          return false if b.respond_to?(:infinite?) && b.infinite?
+
+          diff <= rel_tol * [a.abs, b.abs].max
         in [Array, Array]
           return false unless a.length == b.length
 
-          a.zip(b).all? { |x, y| compare(x, y, epsilon) }
+          a.zip(b).all? { |x, y| compare(x, y, epsilon, rel_tol) }
         in [Hash, Hash]
           return false unless a.keys.sort == b.keys.sort
 
-          a.all? { |k, v| compare(v, b[k], epsilon) }
+          a.all? { |k, v| compare(v, b[k], epsilon, rel_tol) }
         else
           a == b
         end

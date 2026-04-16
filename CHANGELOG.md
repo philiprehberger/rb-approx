@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-04-16
+
+### Added
+- `rel_tol:` option on comparator and RSpec matchers for relative-tolerance approximate equality (combines with absolute `epsilon:` the same way as Python's `math.isclose`)
+
 ## [0.8.0] - 2026-04-15
 
 ### Added

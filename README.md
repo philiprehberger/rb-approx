@@ -65,6 +65,29 @@ Philiprehberger::Approx.relative_equal?(1.0, 2.0, tolerance: 1e-6)
 
 Supports arrays and hashes recursively, just like `equal?`. Falls back to absolute comparison when both values are zero.
 
+### Relative Tolerance on `equal?` (`rel_tol:`)
+
+For Python `math.isclose`-style comparisons, pass `rel_tol:` alongside (or instead of) the absolute `epsilon:`. Values match when `|a - b| <= max(rel_tol * max(|a|, |b|), epsilon)`, so either tolerance is enough to succeed.
+
+```ruby
+# Large magnitudes — absolute epsilon is useless, rel_tol does the work
+Philiprehberger::Approx.equal?(1e12, 1e12 + 1e9, rel_tol: 0.01)
+# => true (within 1% relative)
+
+# Small magnitudes — rel_tol fails but epsilon rescues
+Philiprehberger::Approx.equal?(1e-20, 2e-20, epsilon: 1e-9, rel_tol: 0.01)
+# => true (absolute difference is 1e-20, well under 1e-9)
+
+Philiprehberger::Approx.equal?(1.0, 2.0, rel_tol: 0.01)
+# => false
+
+# rel_tol propagates recursively into arrays and hashes
+Philiprehberger::Approx.equal?([1e12, 2e12], [1e12 + 1e9, 2e12 + 2e9], rel_tol: 0.01)
+# => true
+```
+
+`rel_tol:` defaults to `0`, so omitting it preserves the existing absolute-only behavior. Also available on `.near?`, `.clamp`, `.assert_near`, and the `be_approx` RSpec matcher.
+
 ### Combined Tolerance
 
 ```ruby
@@ -222,12 +245,12 @@ end
 
 | Method | Description |
 |--------|-------------|
-| `.equal?(a, b, epsilon: 1e-9)` | Check approximate equality within epsilon |
-| `.near?(a, b, epsilon: 1e-9)` | Alias for `.equal?` |
+| `.equal?(a, b, epsilon: 1e-9, rel_tol: 0)` | Check approximate equality. With `rel_tol`, passes if either the absolute `epsilon` or the relative tolerance is met (Python `math.isclose` semantics) |
+| `.near?(a, b, epsilon: 1e-9, rel_tol: 0)` | Alias for `.equal?` |
 | `.relative_equal?(a, b, tolerance: 1e-6)` | Check relative tolerance: `\|a - b\| / max(\|a\|, \|b\|) <= tolerance` |
 | `.within?(a, b, abs: nil, rel: nil)` | Combined mode: passes if either absolute or relative tolerance is met |
-| `.clamp(value, target, epsilon: 1e-9)` | Return target if approximately equal, otherwise return value unchanged |
-| `.assert_near(a, b, epsilon: 1e-9)` | Raise `Error` if values differ by more than epsilon |
+| `.clamp(value, target, epsilon: 1e-9, rel_tol: 0)` | Return target if approximately equal, otherwise return value unchanged |
+| `.assert_near(a, b, epsilon: 1e-9, rel_tol: 0)` | Raise `Error` if values differ by more than the allowed tolerance |
 | `.assert_within(a, b, abs: nil, rel: nil)` | Raise `Error` if values fail both tolerance checks |
 | `.zero?(value, epsilon: 1e-9)` | Check if a numeric value is approximately zero |
 | `.percent_equal?(a, b, percent:)` | Check approximate equality within a percentage tolerance |
@@ -235,7 +258,7 @@ end
 | `.between?(value, min, max, epsilon: 1e-9)` | Check if value lies in `[min, max]` with epsilon slack |
 | `.tolerance_range(value, epsilon: 1e-9)` | Return `[min, max]` bounds around a value for a given epsilon |
 | `.sign_equal?(a, b, epsilon: 1e-9)` | Check if two values share the same sign, treating near-zero values as zero |
-| `RSpecMatchers#be_approx(expected, epsilon:)` | RSpec matcher for approximate equality |
+| `RSpecMatchers#be_approx(expected, epsilon:, rel_tol:)` | RSpec matcher for approximate equality. With `rel_tol`, passes if either tolerance is met |
 | `RSpecMatchers#be_approx_within(expected, abs:, rel:, percent:)` | RSpec matcher with abs, rel, or percent tolerance |
 | `Comparator.new(epsilon:, relative:)` | Reusable comparator with preset tolerances |
 | `Comparator#equal?(a, b)` | Check equality using configured tolerances |
