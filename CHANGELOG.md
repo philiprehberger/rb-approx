@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-04-15
+
+### Added
+- `Approx.tolerance_range(value, epsilon:)` returning `[min, max]` bounds around a value for a given epsilon
+- `Comparator#tolerance_range(value)` using the configured epsilon
+
 ## [0.7.0] - 2026-04-15
 
 ### Added

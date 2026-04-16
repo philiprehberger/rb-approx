@@ -94,6 +94,14 @@ module Philiprehberger
         Approx.between?(value, min, max, epsilon: @epsilon)
       end
 
+      # Return the tolerance bounds [min, max] around a value using configured epsilon
+      #
+      # @param value [Numeric] center value
+      # @return [Array<Numeric>] two-element array [value - epsilon, value + epsilon]
+      def tolerance_range(value)
+        Approx.tolerance_range(value, epsilon: @epsilon)
+      end
+
       # Assert that two values pass within?, raising on mismatch
       #
       # @param a [Numeric, Array, Hash] first value

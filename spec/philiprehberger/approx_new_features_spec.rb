@@ -292,6 +292,30 @@ RSpec.describe Philiprehberger::Approx do
       end
     end
 
+    describe '#tolerance_range' do
+      it 'returns bounds using configured epsilon' do
+        c = described_class.new(epsilon: 0.1)
+        expect(c.tolerance_range(5.0)).to eq([4.9, 5.1])
+      end
+
+      it 'uses default epsilon' do
+        c = described_class.new
+        min, max = c.tolerance_range(1.0)
+        expect(min).to be_within(1e-15).of(1.0 - 1e-9)
+        expect(max).to be_within(1e-15).of(1.0 + 1e-9)
+      end
+
+      it 'handles zero value' do
+        c = described_class.new(epsilon: 0.5)
+        expect(c.tolerance_range(0.0)).to eq([-0.5, 0.5])
+      end
+
+      it 'handles negative value' do
+        c = described_class.new(epsilon: 0.1)
+        expect(c.tolerance_range(-3.0)).to eq([-3.1, -2.9])
+      end
+    end
+
     describe 'attributes' do
       it 'exposes epsilon' do
         c = described_class.new(epsilon: 0.5)

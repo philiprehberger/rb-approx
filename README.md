@@ -124,6 +124,18 @@ Philiprehberger::Approx.between?(10.0 + 1e-10, 1.0, 10.0)
 # => true (within epsilon of upper bound)
 ```
 
+### Tolerance Range
+
+```ruby
+Philiprehberger::Approx.tolerance_range(5.0, epsilon: 0.1)
+# => [4.9, 5.1]
+
+Philiprehberger::Approx.tolerance_range(0.0, epsilon: 0.5)
+# => [-0.5, 0.5]
+```
+
+Returns `[min, max]` bounds around a value for a given epsilon. Also available on the `Comparator` using the configured epsilon.
+
 ### Sign Equality
 
 ```ruby
@@ -221,6 +233,7 @@ end
 | `.percent_equal?(a, b, percent:)` | Check approximate equality within a percentage tolerance |
 | `.diff(a, b, epsilon: Float::EPSILON)` | Return diagnostic hash with match status, actual diff, allowed diff, and ratio |
 | `.between?(value, min, max, epsilon: 1e-9)` | Check if value lies in `[min, max]` with epsilon slack |
+| `.tolerance_range(value, epsilon: 1e-9)` | Return `[min, max]` bounds around a value for a given epsilon |
 | `.sign_equal?(a, b, epsilon: 1e-9)` | Check if two values share the same sign, treating near-zero values as zero |
 | `RSpecMatchers#be_approx(expected, epsilon:)` | RSpec matcher for approximate equality |
 | `RSpecMatchers#be_approx_within(expected, abs:, rel:, percent:)` | RSpec matcher with abs, rel, or percent tolerance |
@@ -233,6 +246,7 @@ end
 | `Comparator#clamp(value, target)` | Snap value to target using configured epsilon |
 | `Comparator#zero?(value)` | Check if value is approximately zero using configured epsilon |
 | `Comparator#between?(value, min, max)` | Check if value lies in range using configured epsilon |
+| `Comparator#tolerance_range(value)` | Return `[min, max]` bounds using configured epsilon |
 | `Comparator#assert_within(a, b)` | Raise `Error` if values fail configured tolerance checks |
 | `Error` | Error class raised by `.assert_near` (inherits `StandardError`) |
 

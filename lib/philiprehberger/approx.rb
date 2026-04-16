@@ -102,6 +102,15 @@ module Philiprehberger
       value.between?(min - epsilon, max + epsilon)
     end
 
+    # Return the tolerance bounds [min, max] around a value for a given epsilon
+    #
+    # @param value [Numeric] center value
+    # @param epsilon [Float] tolerance radius
+    # @return [Array<Numeric>] two-element array [value - epsilon, value + epsilon]
+    def self.tolerance_range(value, epsilon: 1e-9)
+      [value - epsilon, value + epsilon]
+    end
+
     # Check if two numeric values share the same sign
     #
     # Values with |x| <= epsilon are treated as zero, so two near-zero values
