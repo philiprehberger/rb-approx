@@ -162,6 +162,50 @@ module Philiprehberger
       compare_percent(a, b, percent)
     end
 
+    # Find the element pair with the largest absolute difference across two arrays or hashes
+    #
+    # For arrays, iterates element-by-element and returns the index and values of
+    # the pair with the greatest absolute difference. For hashes, iterates over
+    # shared keys and uses :key instead of :index. Returns nil if both collections
+    # are empty. Raises Approx::Error for mismatched types or non-collection inputs.
+    #
+    # @param a [Array, Hash] first collection
+    # @param b [Array, Hash] second collection
+    # @param epsilon [Float] tolerance used to set :match on the returned hash
+    # @return [Hash, nil] hash with :index/:key, :a, :b, :diff, :match, :epsilon or nil
+    # @raise [Error] if inputs are not both arrays or both hashes
+    def self.max_diff(a, b, epsilon: 1e-10)
+      unless (a.is_a?(Array) && b.is_a?(Array)) || (a.is_a?(Hash) && b.is_a?(Hash))
+        raise Error, 'both arguments must be arrays or both must be hashes'
+      end
+
+      if a.is_a?(Array)
+        flat_a = a.flatten
+        flat_b = b.flatten
+        return nil if flat_a.empty? && flat_b.empty?
+
+        best = nil
+        flat_a.each_with_index do |val_a, i|
+          val_b = flat_b[i]
+          d = (val_a - val_b).abs
+          best = { index: i, a: val_a, b: val_b, diff: d } if best.nil? || d > best[:diff]
+        end
+        best.merge(match: best[:diff] <= epsilon, epsilon: epsilon)
+      else
+        shared_keys = a.keys & b.keys
+        return nil if shared_keys.empty?
+
+        best = nil
+        shared_keys.each do |k|
+          val_a = a[k]
+          val_b = b[k]
+          d = (val_a - val_b).abs
+          best = { key: k, a: val_a, b: val_b, diff: d } if best.nil? || d > best[:diff]
+        end
+        best.merge(match: best[:diff] <= epsilon, epsilon: epsilon)
+      end
+    end
+
     # Return a diagnostic hash showing why values do or do not match
     #
     # @param a [Numeric] first value

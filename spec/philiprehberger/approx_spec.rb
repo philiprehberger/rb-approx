@@ -421,6 +421,76 @@ RSpec.describe Philiprehberger::Approx do
     end
   end
 
+  describe '.max_diff' do
+    it 'returns nil for two empty arrays' do
+      expect(described_class.max_diff([], [])).to be_nil
+    end
+
+    it 'returns nil for two empty hashes' do
+      expect(described_class.max_diff({}, {})).to be_nil
+    end
+
+    it 'returns the pair with the largest diff for matching arrays' do
+      result = described_class.max_diff([1.0, 2.0, 3.0], [1.0, 2.0, 3.0])
+      expect(result[:diff]).to eq(0.0)
+      expect(result[:match]).to be true
+    end
+
+    it 'returns the pair with the largest diff for arrays with differences' do
+      result = described_class.max_diff([1.0, 2.0, 5.0], [1.0, 2.5, 3.0])
+      expect(result[:index]).to eq(2)
+      expect(result[:a]).to eq(5.0)
+      expect(result[:b]).to eq(3.0)
+      expect(result[:diff]).to be_within(1e-12).of(2.0)
+      expect(result[:match]).to be false
+      expect(result[:epsilon]).to eq(1e-10)
+    end
+
+    it 'handles a single-element array' do
+      result = described_class.max_diff([3.0], [3.0 + 1e-5])
+      expect(result[:index]).to eq(0)
+      expect(result[:diff]).to be_within(1e-12).of(1e-5)
+      expect(result[:match]).to be false
+    end
+
+    it 'sets match: true when diff is within epsilon' do
+      result = described_class.max_diff([1.0], [1.0 + 1e-11], epsilon: 1e-10)
+      expect(result[:match]).to be true
+    end
+
+    it 'returns the pair with the largest diff for hashes' do
+      a = { x: 1.0, y: 10.0, z: 2.0 }
+      b = { x: 1.5, y: 10.0, z: 2.0 }
+      result = described_class.max_diff(a, b)
+      expect(result[:key]).to eq(:x)
+      expect(result[:a]).to eq(1.0)
+      expect(result[:b]).to eq(1.5)
+      expect(result[:diff]).to be_within(1e-12).of(0.5)
+      expect(result[:match]).to be false
+    end
+
+    it 'uses :key instead of :index for hashes' do
+      result = described_class.max_diff({ a: 1.0 }, { a: 2.0 })
+      expect(result).to have_key(:key)
+      expect(result).not_to have_key(:index)
+    end
+
+    it 'raises Error when given mismatched types' do
+      expect { described_class.max_diff([1.0], { a: 1.0 }) }
+        .to raise_error(described_class::Error)
+    end
+
+    it 'raises Error for non-collection inputs' do
+      expect { described_class.max_diff(1.0, 2.0) }
+        .to raise_error(described_class::Error)
+    end
+
+    it 'handles nested arrays by flattening' do
+      result = described_class.max_diff([[1.0, 2.0], [3.0]], [[1.0, 5.0], [3.0]])
+      expect(result[:diff]).to be_within(1e-12).of(3.0)
+    end
+  end
+
   describe '.diff' do
     it 'returns a hash with correct keys' do
       result = described_class.diff(1.0, 2.0)

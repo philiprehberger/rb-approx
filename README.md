@@ -206,6 +206,26 @@ Philiprehberger::Approx.percent_equal?(100.0, 115.0, percent: 10)
 
 Supports arrays and hashes recursively. Returns true when both values are zero.
 
+### Batch Diagnostics
+
+```ruby
+a = [1.0, 2.0, 5.0]
+b = [1.0, 2.5, 3.0]
+Philiprehberger::Approx.max_diff(a, b)
+# => { index: 2, a: 5.0, b: 3.0, diff: 2.0, match: false, epsilon: 1e-10 }
+
+Philiprehberger::Approx.max_diff([1.0, 2.0], [1.0, 2.0])
+# => { index: 0, a: 1.0, b: 1.0, diff: 0.0, match: true, epsilon: 1e-10 }
+
+Philiprehberger::Approx.max_diff({ x: 1.0, y: 10.0 }, { x: 1.5, y: 10.0 })
+# => { key: :x, a: 1.0, b: 1.5, diff: 0.5, match: false, epsilon: 1e-10 }
+
+Philiprehberger::Approx.max_diff([], [])
+# => nil
+```
+
+Finds the element pair with the largest absolute difference across two arrays or hashes. Returns `nil` for empty collections. Raises `Approx::Error` for mismatched types or non-collection inputs.
+
 ### Diff Diagnostics
 
 ```ruby
@@ -257,6 +277,7 @@ end
 | `.diff(a, b, epsilon: Float::EPSILON)` | Return diagnostic hash with match status, actual diff, allowed diff, and ratio |
 | `.between?(value, min, max, epsilon: 1e-9)` | Check if value lies in `[min, max]` with epsilon slack |
 | `.tolerance_range(value, epsilon: 1e-9)` | Return `[min, max]` bounds around a value for a given epsilon |
+| `.max_diff(a, b, epsilon: 1e-10)` | Find the element pair with the largest absolute difference across two arrays or hashes; returns `nil` for empty collections |
 | `.sign_equal?(a, b, epsilon: 1e-9)` | Check if two values share the same sign, treating near-zero values as zero |
 | `RSpecMatchers#be_approx(expected, epsilon:, rel_tol:)` | RSpec matcher for approximate equality. With `rel_tol`, passes if either tolerance is met |
 | `RSpecMatchers#be_approx_within(expected, abs:, rel:, percent:)` | RSpec matcher with abs, rel, or percent tolerance |

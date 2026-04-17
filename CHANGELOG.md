@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-04-16
+
+### Added
+- `Approx.max_diff(a, b, epsilon:)` to find the element pair with the largest absolute difference across two arrays or hashes, returning a diagnostic hash with `:index`/`:key`, `:a`, `:b`, `:diff`, `:match`, and `:epsilon`; returns `nil` for empty collections; raises `Approx::Error` for mismatched or non-collection inputs
+
 ## [0.9.0] - 2026-04-16
 
 ### Added
