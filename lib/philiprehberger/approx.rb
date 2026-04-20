@@ -34,6 +34,28 @@ module Philiprehberger
       equal?(a, b, epsilon: epsilon, rel_tol: rel_tol)
     end
 
+    # Check if every element of an enumerable is approximately equal to the first
+    #
+    # Accepts any Enumerable and iterates via .to_a. Empty and single-element
+    # collections return true. Reuses the same tolerance semantics as .equal?,
+    # so either absolute epsilon or relative tolerance (or both) may be supplied.
+    #
+    # @param values [Enumerable] collection of values to compare
+    # @param epsilon [Float] maximum allowed absolute difference (defaults to .equal?'s default)
+    # @param rel_tol [Float] relative tolerance (defaults to .equal?'s default)
+    # @return [Boolean] true if every element is approximately equal to the first
+    def self.all_equal?(values, epsilon: nil, rel_tol: nil)
+      arr = values.to_a
+      return true if arr.length < 2
+
+      opts = {}
+      opts[:epsilon] = epsilon unless epsilon.nil?
+      opts[:rel_tol] = rel_tol unless rel_tol.nil?
+
+      first = arr.first
+      arr.drop(1).all? { |v| equal?(first, v, **opts) }
+    end
+
     # Check if two values are approximately equal using relative tolerance
     #
     # Relative tolerance: |a - b| / max(|a|, |b|) <= tolerance

@@ -53,6 +53,15 @@ Philiprehberger::Approx.equal?({ x: 1.0 }, { x: 1.0 + 1e-10 })
 # => true
 ```
 
+### All Equal
+
+```ruby
+Philiprehberger::Approx.all_equal?([1.0, 1.0 + 1e-12, 1.0 - 1e-12]) # => true
+Philiprehberger::Approx.all_equal?([1.0, 1.5])                     # => false
+```
+
+Returns true iff every element of an enumerable is approximately equal to the first. Accepts any Enumerable (arrays, ranges, enumerators). Empty and single-element collections return true. Reuses the same tolerance semantics as `.equal?`.
+
 ### Relative Tolerance
 
 ```ruby
@@ -267,6 +276,7 @@ end
 |--------|-------------|
 | `.equal?(a, b, epsilon: 1e-9, rel_tol: 0)` | Check approximate equality. With `rel_tol`, passes if either the absolute `epsilon` or the relative tolerance is met (Python `math.isclose` semantics) |
 | `.near?(a, b, epsilon: 1e-9, rel_tol: 0)` | Alias for `.equal?` |
+| `.all_equal?(values, epsilon:, rel_tol:)` | Check if every element of an enumerable is approximately equal to the first (reuses `.equal?` tolerance semantics) |
 | `.relative_equal?(a, b, tolerance: 1e-6)` | Check relative tolerance: `\|a - b\| / max(\|a\|, \|b\|) <= tolerance` |
 | `.within?(a, b, abs: nil, rel: nil)` | Combined mode: passes if either absolute or relative tolerance is met |
 | `.clamp(value, target, epsilon: 1e-9, rel_tol: 0)` | Return target if approximately equal, otherwise return value unchanged |

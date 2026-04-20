@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-04-19
+
+### Added
+- `Approx.all_equal?(values, epsilon:, rel_tol:)` — true iff every element of an enumerable is approximately equal to the first; reuses existing tolerance semantics
+
 ## [0.10.0] - 2026-04-16
 
 ### Added
