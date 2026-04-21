@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-04-21
+
+### Added
+- `Philiprehberger::Approx.monotonic?` — approximate monotonicity check with direction and tolerance controls
+
+### Fixed
+- `bug_report.yml` — mark `gem-version` as required per guide
+
 ## [0.11.0] - 2026-04-19
 
 ### Added
