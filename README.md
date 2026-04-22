@@ -62,6 +62,18 @@ Philiprehberger::Approx.all_equal?([1.0, 1.5])                     # => false
 
 Returns true iff every element of an enumerable is approximately equal to the first. Accepts any Enumerable (arrays, ranges, enumerators). Empty and single-element collections return true. Reuses the same tolerance semantics as `.equal?`.
 
+### Approximate Monotonicity
+
+```ruby
+Philiprehberger::Approx.monotonic?([1.0, 2.0, 2.0 + 1e-12, 3.0], direction: :non_decreasing)
+# => true
+
+Philiprehberger::Approx.monotonic?([1.0, 1.0 + 1e-12, 2.0], direction: :increasing)
+# => false (near-equal neighbors fail strict monotonicity)
+```
+
+Checks whether adjacent pairs of a sequence are monotonic under the same tolerance model as `.equal?`. Accepts `direction: :increasing`, `:decreasing`, `:non_decreasing`, or `:non_increasing`. Empty and single-element sequences return `true`.
+
 ### Relative Tolerance
 
 ```ruby
@@ -277,6 +289,7 @@ end
 | `.equal?(a, b, epsilon: 1e-9, rel_tol: 0)` | Check approximate equality. With `rel_tol`, passes if either the absolute `epsilon` or the relative tolerance is met (Python `math.isclose` semantics) |
 | `.near?(a, b, epsilon: 1e-9, rel_tol: 0)` | Alias for `.equal?` |
 | `.all_equal?(values, epsilon:, rel_tol:)` | Check if every element of an enumerable is approximately equal to the first (reuses `.equal?` tolerance semantics) |
+| `.monotonic?(values, direction:, epsilon:, rel_tol:)` | Check approximate monotonicity of a sequence |
 | `.relative_equal?(a, b, tolerance: 1e-6)` | Check relative tolerance: `\|a - b\| / max(\|a\|, \|b\|) <= tolerance` |
 | `.within?(a, b, abs: nil, rel: nil)` | Combined mode: passes if either absolute or relative tolerance is met |
 | `.clamp(value, target, epsilon: 1e-9, rel_tol: 0)` | Return target if approximately equal, otherwise return value unchanged |

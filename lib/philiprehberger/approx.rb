@@ -56,6 +56,44 @@ module Philiprehberger
       arr.drop(1).all? { |v| equal?(first, v, **opts) }
     end
 
+    # Check if a sequence is approximately monotonic under the tolerance model of .equal?
+    #
+    # Pairwise compares adjacent elements using the same absolute/relative tolerance
+    # helpers as .equal?. For strict directions (:increasing, :decreasing) each pair
+    # must satisfy the strict inequality AND must not be approximately equal within
+    # the configured tolerance. For non-strict directions (:non_decreasing,
+    # :non_increasing) each pair must satisfy the non-strict inequality OR be
+    # approximately equal within the configured tolerance. Empty and single-element
+    # sequences return true.
+    #
+    # @param values [Enumerable] collection of values to inspect
+    # @param direction [Symbol] one of :increasing, :decreasing, :non_decreasing, :non_increasing
+    # @param epsilon [Float] maximum allowed absolute difference (defaults to .equal?'s default)
+    # @param rel_tol [Float] relative tolerance (default 0 — disabled)
+    # @return [Boolean] true if the sequence is approximately monotonic in the requested direction
+    # @raise [ArgumentError] if direction is not one of the four accepted symbols
+    def self.monotonic?(values, direction: :increasing, epsilon: nil, rel_tol: 0.0)
+      unless %i[increasing decreasing non_decreasing non_increasing].include?(direction)
+        raise ArgumentError, "unknown direction: #{direction.inspect}"
+      end
+
+      arr = values.to_a
+      return true if arr.length < 2
+
+      opts = { rel_tol: rel_tol }
+      opts[:epsilon] = epsilon unless epsilon.nil?
+
+      arr.each_cons(2).all? do |a, b|
+        near = equal?(a, b, **opts)
+        case direction
+        when :increasing     then a < b && !near
+        when :decreasing     then a > b && !near
+        when :non_decreasing then a <= b || near
+        when :non_increasing then a >= b || near
+        end
+      end
+    end
+
     # Check if two values are approximately equal using relative tolerance
     #
     # Relative tolerance: |a - b| / max(|a|, |b|) <= tolerance
