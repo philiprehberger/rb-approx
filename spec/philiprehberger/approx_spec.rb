@@ -706,4 +706,34 @@ RSpec.describe Philiprehberger::Approx do
       end
     end
   end
+
+  describe '.compare' do
+    it 'returns 0 for identical values' do
+      expect(described_class.compare(1.0, 1.0)).to eq(0)
+    end
+
+    it 'returns 0 for values within epsilon' do
+      expect(described_class.compare(1.0, 1.0 + 1e-12)).to eq(0)
+    end
+
+    it 'returns -1 when a < b beyond epsilon' do
+      expect(described_class.compare(1.0, 2.0)).to eq(-1)
+    end
+
+    it 'returns 1 when a > b beyond epsilon' do
+      expect(described_class.compare(2.0, 1.0)).to eq(1)
+    end
+
+    it 'honors relative tolerance for the equality branch' do
+      expect(described_class.compare(1e12, 1e12 + 1e9, rel_tol: 0.01)).to eq(0)
+    end
+
+    it 'returns -1 when a is less and rel_tol does not save it' do
+      expect(described_class.compare(1.0, 100.0, rel_tol: 0.01)).to eq(-1)
+    end
+
+    it 'returns nil for NaN values (matches Ruby <=> semantics)' do
+      expect(described_class.compare(Float::NAN, 1.0)).to be_nil
+    end
+  end
 end

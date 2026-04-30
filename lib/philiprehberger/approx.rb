@@ -20,7 +20,7 @@ module Philiprehberger
     # @param rel_tol [Float] relative tolerance (default 0 — disabled)
     # @return [Boolean] true if values are approximately equal
     def self.equal?(a, b, epsilon: 1e-9, rel_tol: 0)
-      compare(a, b, epsilon, rel_tol)
+      compare_recursive(a, b, epsilon, rel_tol)
     end
 
     # Alias for equal? with explicit epsilon
@@ -266,6 +266,24 @@ module Philiprehberger
       end
     end
 
+    # Three-way comparison with tolerance — like Ruby's spaceship operator,
+    # except values within tolerance return 0.
+    #
+    # Returns 0 when a and b are approximately equal (delegates to .equal?),
+    # otherwise returns -1 if a < b, 1 if a > b. NaN/incomparable values
+    # return nil so callers can detect the case the same way as Ruby's <=>.
+    #
+    # @param a [Numeric] first value
+    # @param b [Numeric] second value
+    # @param epsilon [Float] maximum allowed absolute difference
+    # @param rel_tol [Float] relative tolerance (default 0 — disabled)
+    # @return [Integer, nil] -1, 0, 1, or nil for incomparable values
+    def self.compare(a, b, epsilon: 1e-9, rel_tol: 0)
+      return 0 if equal?(a, b, epsilon: epsilon, rel_tol: rel_tol)
+
+      a <=> b
+    end
+
     # Return a diagnostic hash showing why values do or do not match
     #
     # @param a [Numeric] first value
@@ -288,7 +306,7 @@ module Philiprehberger
     class << self
       private
 
-      def compare(a, b, epsilon, rel_tol = 0)
+      def compare_recursive(a, b, epsilon, rel_tol = 0)
         case [a, b]
         in [Numeric, Numeric]
           diff = (a - b).abs
@@ -303,11 +321,11 @@ module Philiprehberger
         in [Array, Array]
           return false unless a.length == b.length
 
-          a.zip(b).all? { |x, y| compare(x, y, epsilon, rel_tol) }
+          a.zip(b).all? { |x, y| compare_recursive(x, y, epsilon, rel_tol) }
         in [Hash, Hash]
           return false unless a.keys.sort == b.keys.sort
 
-          a.all? { |k, v| compare(v, b[k], epsilon, rel_tol) }
+          a.all? { |k, v| compare_recursive(v, b[k], epsilon, rel_tol) }
         else
           a == b
         end

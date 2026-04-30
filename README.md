@@ -247,6 +247,20 @@ Philiprehberger::Approx.max_diff([], [])
 
 Finds the element pair with the largest absolute difference across two arrays or hashes. Returns `nil` for empty collections. Raises `Approx::Error` for mismatched types or non-collection inputs.
 
+### Three-Way Comparison
+
+```ruby
+Philiprehberger::Approx.compare(1.0, 1.0 + 1e-12)            # => 0  (within epsilon)
+Philiprehberger::Approx.compare(1.0, 2.0)                    # => -1
+Philiprehberger::Approx.compare(2.0, 1.0)                    # => 1
+Philiprehberger::Approx.compare(1e12, 1e12 + 1e9, rel_tol: 0.01) # => 0
+```
+
+Three-way comparison with tolerance — like Ruby's `<=>`, but values that are
+approximately equal under the configured tolerance return `0`. Returns `nil`
+for incomparable values (e.g. NaN), matching Ruby's spaceship-operator
+semantics.
+
 ### Diff Diagnostics
 
 ```ruby
@@ -298,6 +312,7 @@ end
 | `.zero?(value, epsilon: 1e-9)` | Check if a numeric value is approximately zero |
 | `.percent_equal?(a, b, percent:)` | Check approximate equality within a percentage tolerance |
 | `.diff(a, b, epsilon: Float::EPSILON)` | Return diagnostic hash with match status, actual diff, allowed diff, and ratio |
+| `.compare(a, b, epsilon:, rel_tol:)` | Three-way comparison with tolerance: returns `-1`, `0`, or `1`; near-equal values return `0`; `nil` for NaN |
 | `.between?(value, min, max, epsilon: 1e-9)` | Check if value lies in `[min, max]` with epsilon slack |
 | `.tolerance_range(value, epsilon: 1e-9)` | Return `[min, max]` bounds around a value for a given epsilon |
 | `.max_diff(a, b, epsilon: 1e-10)` | Find the element pair with the largest absolute difference across two arrays or hashes; returns `nil` for empty collections |

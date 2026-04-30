@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-04-30
+
+### Added
+- `Approx.compare(a, b, epsilon:, rel_tol:)` — three-way comparison with tolerance; near-equal values return `0`, otherwise delegates to `<=>` (returns `-1`, `1`, or `nil` for NaN)
+
 ## [0.12.0] - 2026-04-21
 
 ### Added
