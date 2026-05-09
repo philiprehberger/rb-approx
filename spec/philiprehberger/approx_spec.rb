@@ -538,6 +538,47 @@ RSpec.describe Philiprehberger::Approx do
     end
   end
 
+  describe '.cluster' do
+    it 'groups values within epsilon into the same cluster' do
+      groups = described_class.cluster([1.0, 1.0 + 1e-10, 2.0, 2.0 - 1e-12], epsilon: 1e-9)
+      expect(groups.length).to eq(2)
+      expect(groups[0].length).to eq(2)
+      expect(groups[1].length).to eq(2)
+    end
+
+    it 'creates a new cluster for values outside the tolerance' do
+      groups = described_class.cluster([1.0, 1.5, 2.0], epsilon: 0.1)
+      expect(groups).to eq([[1.0], [1.5], [2.0]])
+    end
+
+    it 'preserves input order across and within clusters' do
+      groups = described_class.cluster([1.0, 5.0, 1.0001, 5.0001, 1.0002], epsilon: 0.001)
+      expect(groups[0]).to eq([1.0, 1.0001, 1.0002])
+      expect(groups[1]).to eq([5.0, 5.0001])
+    end
+
+    it 'returns an empty array for an empty input' do
+      expect(described_class.cluster([])).to eq([])
+    end
+
+    it 'returns a single cluster for a single value' do
+      expect(described_class.cluster([42])).to eq([[42]])
+    end
+
+    it 'groups by relative tolerance when configured' do
+      groups = described_class.cluster([1_000_000.0, 1_000_001.0, 2_000_000.0],
+                                       epsilon: 0, rel_tol: 1e-5)
+      expect(groups.length).to eq(2)
+      expect(groups[0]).to eq([1_000_000.0, 1_000_001.0])
+      expect(groups[1]).to eq([2_000_000.0])
+    end
+
+    it 'accepts any Enumerable input' do
+      groups = described_class.cluster(1..3, epsilon: 0)
+      expect(groups).to eq([[1], [2], [3]])
+    end
+  end
+
   describe '.diff' do
     it 'returns a hash with correct keys' do
       result = described_class.diff(1.0, 2.0)

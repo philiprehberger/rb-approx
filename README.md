@@ -273,6 +273,21 @@ Philiprehberger::Approx.diff(1.0, 3.0, epsilon: 1.0)
 
 Returns a diagnostic hash showing the actual difference, the allowed tolerance, and the ratio between them.
 
+### Cluster Near-Values
+
+```ruby
+Philiprehberger::Approx.cluster([1.0, 1.0001, 5.0, 5.0001, 1.0002], epsilon: 0.001)
+# => [[1.0, 1.0001, 1.0002], [5.0, 5.0001]]
+
+Philiprehberger::Approx.cluster([1_000_000.0, 1_000_001.0, 2_000_000.0],
+                                epsilon: 0, rel_tol: 1e-5)
+# => [[1000000.0, 1000001.0], [2000000.0]]
+```
+
+Groups numeric values into clusters where each member is approximately equal
+to its cluster's first element under the same `epsilon` / `rel_tol` model
+as `.equal?`.
+
 ### RSpec Integration
 
 ```ruby
@@ -312,6 +327,7 @@ end
 | `.zero?(value, epsilon: 1e-9)` | Check if a numeric value is approximately zero |
 | `.percent_equal?(a, b, percent:)` | Check approximate equality within a percentage tolerance |
 | `.diff(a, b, epsilon: Float::EPSILON)` | Return diagnostic hash with match status, actual diff, allowed diff, and ratio |
+| `.cluster(values, epsilon: 1e-9, rel_tol: 0)` | Group numeric values into clusters where each member is approximately equal to the cluster's first element |
 | `.compare(a, b, epsilon:, rel_tol:)` | Three-way comparison with tolerance: returns `-1`, `0`, or `1`; near-equal values return `0`; `nil` for NaN |
 | `.between?(value, min, max, epsilon: 1e-9)` | Check if value lies in `[min, max]` with epsilon slack |
 | `.tolerance_range(value, epsilon: 1e-9)` | Return `[min, max]` bounds around a value for a given epsilon |

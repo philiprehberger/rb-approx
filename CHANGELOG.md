@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-05-09
+
+### Added
+- `Approx.cluster(values, epsilon:, rel_tol:)` — group near-equal numeric values into clusters using the same tolerance model as `.equal?` (each value joins the first cluster whose first member is approximately equal, otherwise starts a new cluster)
+
 ## [0.13.0] - 2026-04-30
 
 ### Added

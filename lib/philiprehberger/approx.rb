@@ -284,6 +284,32 @@ module Philiprehberger
       a <=> b
     end
 
+    # Group near-equal numeric values into clusters
+    #
+    # Each value is placed into the first existing cluster whose first member
+    # (representative) is approximately equal to it under the same tolerance
+    # model as `.equal?` (absolute `epsilon` and/or relative `rel_tol`).
+    # If no cluster matches, a new cluster is created. Order of values inside
+    # each cluster mirrors their order in the input.
+    #
+    # @param values [Enumerable] numeric values to group
+    # @param epsilon [Float] maximum allowed absolute difference
+    # @param rel_tol [Float] relative tolerance (default 0 — disabled)
+    # @return [Array<Array<Numeric>>] clusters in the order they were created
+    def self.cluster(values, epsilon: 1e-9, rel_tol: 0)
+      arr = values.to_a
+      clusters = []
+      arr.each do |v|
+        bucket = clusters.find { |c| equal?(c.first, v, epsilon: epsilon, rel_tol: rel_tol) }
+        if bucket
+          bucket << v
+        else
+          clusters << [v]
+        end
+      end
+      clusters
+    end
+
     # Return a diagnostic hash showing why values do or do not match
     #
     # @param a [Numeric] first value
